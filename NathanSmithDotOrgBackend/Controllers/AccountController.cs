@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using NathanSmithDotOrgBackend.Auth;
 
@@ -34,7 +35,17 @@ namespace NathanSmithDotOrgBackend.Controllers
             string userId = _helper.Login(combo.username, combo.password);
             if (userId == null)
                 return BadRequest();
+
+            // Add session
+            HttpContext.Session.SetString("_userId", userId);
+
             return userId;
+        }
+
+        [HttpGet("logout")]
+        public void Logout()
+        {
+            HttpContext.Session.Remove("_userId");
         }
 
         // GET api/account
@@ -42,6 +53,13 @@ namespace NathanSmithDotOrgBackend.Controllers
         public ActionResult<List<string>> List()
         {
             return _helper.ListAccounts();
+        }
+
+        // GET api/account/status
+        [HttpGet("status")]
+        public ActionResult<string> Status()
+        {
+            return HttpContext.Session.GetString("_userId");
         }
     }
 
